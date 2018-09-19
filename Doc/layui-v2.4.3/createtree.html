@@ -1,0 +1,97 @@
+<html>
+    <head>
+        <title>test</title>
+        <script src="jquery-1.11.3.js" ></script>
+    </head>
+    <body>
+        <h1></h1>
+        Create Tree:<select id="rootMenum" onselect="sel(this)" ></select><br/>
+        Create Tree Child:<input type="text" id="mc"  /><button onclick="Create()">Submit</button>
+<br/>
+        <select id="childMenum" ></select>
+        Create Tree Child:<input type="text" id="mcs"  /><button onclick="Create()">Submit</button>
+        <script>
+
+            var dataset;
+            $(function(){
+                var ns={name:"23"};
+
+                $.ajax({
+                    url:"http://localhost:8080/Test",
+                    type:"POST",
+                    contentType:"application/json;charset=utf-8",
+                    data:JSON.stringify(ns) ,
+                    success:function(data){
+                        alert("df");
+                    }
+                })
+                
+                var url="http://localhost:889/tree?id="+getUrlParam("id");
+
+                $.ajax({
+                    url:url,
+                    type:"GET",
+                    success:function(data)
+                    {
+                        dataset=data;
+                        addoption();
+                    }
+                });
+                
+                
+            });
+            
+            function addoption(){
+                for(var i=0;i<dataset.length;i++)
+                    $('#rootMenum').append("<option value="+dataset[i].silfid+">"+dataset[i].name+"</option>");
+
+            }
+            
+    
+    function fu()
+    {
+        var tmp= $('#rootMenum').val();
+        for(var i=0;i<dataset.length;i++)
+        {
+            if(dataset[i].silfid==tmp){
+                for(var j=0;i<dataset[i].children.length;i++)
+                {
+                    $('#childMenum').append("<option value="+dataset[i].children[j].silfid+">"+dataset[i].children[j].name+"</option>");
+                }
+            }
+        }
+    }
+
+    function Create()
+    {
+        var mc= $("#mc").val();
+        var id=$("#rootMenum").val();
+        var parameter={
+                "documentid": -1,
+                "menumName": mc,
+                "paretmenum": id
+            };
+        var datas= JSON.stringify(parameter);
+            $.ajax({
+                url:"http://localhost:889/Menum",
+                type:"POST",
+                contentType:"application/json;charset=utf-8",//restful must use
+                data:datas,
+                success:function(data){
+                    alert("ok");
+                }
+            });
+    }
+
+     function getUrlParam(name)
+     {
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
+            var r = window.location.search.substr(1).match(reg);  //匹配目标参数
+            if (r != null) return unescape(r[2]); return null; //返回参数值
+     }
+    function sel(my){
+        fu();
+    }
+        </script>
+    </body>
+</html>

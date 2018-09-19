@@ -1,0 +1,51 @@
+
+<html>
+    <head>
+            <meta charset="utf-8"/>
+            <meta name="keywords" content="markdown在线编辑器,online markdown editor,markdown编辑器,在线编辑markdown,mdeditor"/>
+    <meta name="description" content="mdeditor是一个在线编辑markdown的工具"/>
+    <script src="jquery.min.js"></script>
+    <script src="./lib/marked.min.js"></script>
+    <script src="./lib/prettify.min.js"></script>
+    <script src="./lib/raphael.min.js"></script>
+    <script src="./lib/underscore.min.js"></script>
+    <script src="./lib/sequence-diagram.min.js"></script>
+    <script src="./lib/flowchart.min.js"></script>
+    
+    <script src="./lib/jquery.flowchart.min.js"></script>
+    <script src="./editormd.min.js"></script>
+    <link rel="stylesheet" href="./css/editormd.min.css"/>
+    <link rel="shortcut icon" href="./images/logos/favicon.ico" type="image/x-icon"/>
+
+<script type="text/javascript">
+    var testEditor;
+    $(function() {
+        testEditor = editormd.markdownToHTML("doc-content", {//注意：这里是上面DIV的id
+            htmlDecode : "style,script,iframe",
+            emoji : true,
+            taskList : true,
+            tex : true, // 默认不解析
+            flowChart : true, // 默认不解析
+            sequenceDiagram : true, // 默认不解析
+            codeFold : true
+        });
+    });
+</script>
+    </head>‪
+    <body>
+<div class="panel panel-default">
+    <div class="panel-body">
+        <!-- 用于显示md编辑器的md格式 -->
+        <div id="doc-content">
+            <textarea style="display:none;">
+				lsjdfl
+# 欢迎使用 Markdown在线编辑器 MdEditor
+			
+			
+			</textarea>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

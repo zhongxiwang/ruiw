@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>layui</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="layui/css/layui.css" media="all">
+    <!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
+    <style type="text/css">
+        .downpanel .layui-select-title span {
+            line-height: 38px;
+        }
+
+        /*继承父类颜色*/
+        .downpanel dl dd:hover {
+            background-color: inherit;
+        }
+    </style>
+    <style type="text/css">
+        body {
+            height: 100%;
+            width: 100%;
+            background-size: cover;
+            margin: 0 auto;
+        }
+        td {
+            font-size: 12px !important;
+        }
+
+        .layui-form-checkbox span {
+            height: 30px;
+        }
+        .layui-field-title {
+            border-top: 1px solid white;
+        }
+        table {
+            width: 100% !important;
+        }
+
+    </style>
+
+</head>
+<body>
+<div style="width: 18%;float: left;">
+    <h1>document</h1>
+    <div style="margin: 10px; padding: 14px; ">
+      <input id="mc"  type="text" name="title" lay-verify="title" autocomplete="off" placeholder="create Menum" class="layui-input">
+      <br/><button onclick="Create()" class="layui-btn layui-btn-primary">CreateMenum</button>
+      
+       <br/><button class="layui-btn layui-btn-primary" style="margin-top: 10px;"><a href=""> CreateDocument</a></button>
+    </div>
+    <hr/>
+    
+    <ul id="classtree"></ul>
+</div>
+<div style="background-color:blue;width: 65%;float: left;">
+    sdfs
+
+</div>
+<div style="width: 17%; float:left;background-color: red;">
+sdf
+</div>
+  
+
+
+
+<script src="jquery-1.11.3.js" ></script>
+<script src="layui/layui.js " charset="utf-8"></script>
+<!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
+<script type="text/javascript">
+
+var manager;
+var tmp=[{
+                name: '常用文件夹',
+                id: 1,
+                alias: 'changyong',
+                children: [{name: '所有未读', id: 11, href: 'http://www.layui.com/', alias: 'weidu'}, {
+                    name: '置顶邮件',
+                    id: 12
+                }, {name: '标签邮件', id: 13}]
+            }, {
+                name: '我的邮箱',
+                id: 2,
+                spread: true,
+                
+                children: [{
+                    name: 'QQ邮箱',
+                    id: 21,
+                    spread: true,
+                    children: [{
+                        name: '收件箱',
+                        id: 211,
+                        children: [{name: '所有未读', id: 2111}, {name: '置顶邮件', id: 2112}, {name: '标签邮件', id: 2113}]
+                    }, {name: '已发出的邮件', id: 212}, {name: '垃圾邮件', id: 213}]
+                }, {
+                    name: '阿里云邮',
+                    id: 22,
+                    href:"javascript:alert('23')",
+                    children: [{name: '收件箱', id: 221}, {name: '已发出的邮件', id: 222}, {name: '垃圾邮件', id: 223}]
+                }]
+            }];
+
+
+    layui.use(['tree', 'layer'], function () {
+        var $ = layui.jquery, tree = layui.tree;
+        var treelist=null;
+
+
+        $(function()
+          {
+
+        $.ajax({
+            url:"http://localhost:889/tree?id=0",
+            type:"GET",
+            success:function(data){
+                 
+                
+                tree({
+                    elem: "#classtree",
+                    nodes: data
+                    ,
+                    click: function (node) {
+                        var $select = $($(this)[0].elem).parents(".layui-form-select");
+                        $select.removeClass("layui-form-selected").find(".layui-select-title span").html(node.name).end().find("input:hidden[name='selectID']").val(node.id);
+                        console.log(node);
+                    }
+                });
+             }
+            });
+        });
+
+
+        $(document).on("click", function (e) {
+            $(".layui-form-select").removeClass("layui-form-selected");
+            console.log(e);
+        });
+        
+    });
+function SetId(id)
+{
+    manager=id;
+}
+    function Create()
+    {
+        var mc= $("#mc").val();
+        var id=manager;
+        var parameter={
+             "documentid": -1,
+             "menumName": mc,
+            "paretmenum": id
+    };
+var datas= JSON.stringify(parameter);
+        $.ajax({
+            url:"http://localhost:889/Menum",
+            type:"POST",
+            contentType:"application/json;charset=utf-8",//restful must use
+            data:datas,
+            success:function(data){
+                alert("ok");
+            }
+        });
+    }
+</script>
+</body>
+</html>
+</body>
+</html>

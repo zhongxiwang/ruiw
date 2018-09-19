@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>layui</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="./layui-v2.4.3/layui/css/layui.css" media="all">
+
+    <link rel="shortcut icon" href="./editormd/images/logos/favicon.ico" type="image/x-icon" />
+
+    <script src="./editormd/jquery.min.js"></script>
+    <script src="./editormd/lib/marked.min.js"></script>
+    <script src="./editormd/lib/prettify.min.js"></script>
+    <script src="./editormd/lib/raphael.min.js"></script>
+    <script src="./editormd/lib/underscore.min.js"></script>
+    <script src="./editormd/lib/sequence-diagram.min.js"></script>
+    <script src="./editormd/lib/flowchart.min.js"></script>
+
+    <script src="./editormd/lib/jquery.flowchart.min.js"></script>
+    <script src="./editormd/editormd.min.js"></script>
+    <link rel="stylesheet" href="./editormd/css/editormd.min.css" />
+
+    <style type="text/css">
+        .downpanel .layui-select-title span {
+            line-height: 38px;
+        }
+
+        /*继承父类颜色*/
+
+        .downpanel dl dd:hover {
+            background-color: inherit;
+        }
+    </style>
+    <style type="text/css">
+        body {
+            height: 100%;
+            width: 100%;
+            background-size: cover;
+            margin: 0 auto;
+        }
+
+        td {
+            font-size: 12px !important;
+        }
+
+        .layui-form-checkbox span {
+            height: 30px;
+        }
+
+        .layui-field-title {
+            border-top: 1px solid white;
+        }
+
+        table {
+            width: 100% !important;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div id="menumlist" style="width: 18%;float: left;">
+        <h1 id="doctype">document</h1>
+        <div style="margin: 10px; padding: 14px; ">
+            <input id="mc" type="text" name="title" lay-verify="title" autocomplete="off" placeholder="create Menum" class="layui-input">
+            <br/>
+            <button onclick="Create()" class="layui-btn layui-btn-primary">CreateMenum</button>
+
+            <br/>
+            <button class="layui-btn layui-btn-primary" style="margin-top: 10px;" onclick="CreateDoc()"> CreateDocument</button>
+        </div>
+        <hr/>
+
+        <ul id="classtree"></ul>
+    </div>
+    <div class="panel-body" style="width: 65%;float: left;">
+
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <!-- 用于显示md编辑器的md格式 -->
+                <div id="doc-content">
+                    <textarea id="doc" style="display:none;"># please select document
+                    </textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div style="width: 17%; float:right;">
+        <div style="margin-top: 20%;text-align: center;" class="list">
+            <a href="#" id="editorid">编辑</a>
+            <br/>
+            <a href="#" id="deleteid" onclick="Delete()">删除</a>
+            <br/>
+            <a href="#" id="showhide" onclick="show()">隐藏</a>
+        </div>
+    </div>
+
+
+
+
+    <script src="./layui-v2.4.3/layui/layui.js " charset="utf-8"></script>
+    <script src="editormd/editormd.js"></script>
+
+    <!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
+    <script type="text/javascript">
+
+        var manager = -1;
+        layui.use(['tree', 'layer'], function () {
+            var $ = layui.jquery, tree = layui.tree;
+            var treelist = null;
+
+
+            $(function () {
+
+                $.ajax({
+                    url: "http://localhost:889/tree?id=" + getUrlParam("menumid"),
+                    type: "GET",
+                    success: function (data) {
+
+
+                        tree({
+                            elem: "#classtree",
+                            nodes: data
+                            ,
+                            click: function (node) {
+                                var $select = $($(this)[0].elem).parents(".layui-form-select");
+                                $select.removeClass("layui-form-selected").find(".layui-select-title span").html(node.name).end().find("input:hidden[name='selectID']").val(node.id);
+
+                                if (node.docid > 0) {
+                                    Open(node.docid);
+                                }
+
+                            }
+                        });
+                    }
+                });
+
+                Titles();
+            });
+
+
+            $(document).on("click", function (e) {
+                $(".layui-form-select").removeClass("layui-form-selected");
+                console.log(e);
+            });
+
+        });
+        var testEditor;
+        $(function () {
+           xr();
+            
+        });
+
+        function SetId(id) {
+            manager = id;
+        }
+        function Create() {
+            var mc = $("#mc").val();
+            if (manager === -1) manager = getUrlParam("menumid");
+            var id = manager;
+            var parameter = {
+                "documentid": -1,
+                "menumName": mc,
+                "paretmenum": id
+            };
+            var datas = JSON.stringify(parameter);
+            $.ajax({
+                url: "http://localhost:889/Menum",
+                type: "POST",
+                contentType: "application/json;charset=utf-8",//restful must use
+                data: datas,
+                success: function (data) {
+                    alert("ok");
+                }
+            });
+        }
+        function CreateDoc() {
+            if (manager === -1) manager = getUrlParam("menumid");
+            var title = $('#mc').val();
+            var blogcontent = "## " + title;
+
+            var url = "http://localhost:889/document/" + manager;
+            var data = {
+                "content": blogcontent,
+                "title": title
+            };
+            $.ajax({
+                url: url,
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(data),
+                success: function (data) {
+                    window.open("./editor.html?docid=" + data);
+                    layer.msg('create Ok');
+                }
+            });
+
+
+        }
+
+        function Open(id) {
+            $.ajax({
+                url: "http://localhost:889/document/" + id,
+                type: "GET",
+                success: function (data) {
+                    $('#doc-content').html('<textarea id="doc" style="display:none;"></textarea>');
+                    $('#doc').html(data.content);
+                    xr();
+                    $('#editorid').attr("href", "./editor.html?docid=" + data.id);
+                    $('#deleteid').attr("did", data.id);
+                    $('#deleteid').attr("mid", manager);
+                }
+            });
+        }
+
+        function getUrlParam(k) {
+            var regExp = new RegExp('([?]|&)' + k + '=([^&]*)(&|$)');
+            var result = window.location.href.match(regExp);
+            if (result) {
+                return decodeURIComponent(result[2]);
+            } else {
+                return null;
+            }
+        }
+
+        function Update() {
+            window.open("./editor.html?docid=" + getUrlParam(""));
+        }
+        function show() {
+            if ($('#showhide').html() === "隐藏") {
+                $('#showhide').html("显示");
+                $('#menumlist').hide();
+            } else {
+                $('#showhide').html("隐藏");
+                $('#menumlist').show();
+            }
+
+        }
+        function Titles() {
+            $.ajax({
+                url: "http://localhost:889/Menum/" + getUrlParam("menumid"),
+                type: "GET",
+                success: function (data) {
+                    $('#doctype').html(data.menumName);
+                }
+            })
+        }
+        function Delete() {
+            var mymessage = confirm("you want delete document?");
+            if (mymessage) {
+                $.ajax({
+                    url: "http://localhost:889/document/" + $('#deleteid').attr("did") + "/" + $('#deleteid').attr("mid"),
+                    type: "DELETE",
+                    success: function (data) {
+                        window.href.location=window.href.location;
+                    }
+                });
+            }
+
+        }
+
+        function xr(){
+            testEditor = editormd.markdownToHTML("doc-content", {
+                htmlDecode: "style,script,iframe",  // you can filter tags decode
+                emoji: true,
+                taskList: true,
+                tex: true,  // 默认不解析
+                flowChart: true,  // 默认不解析
+                sequenceDiagram: true,  // 默认不解析
+                codeFold: true,
+            });
+        }
+    </script>
+</body>
+
+</html>
+</body>
+
+</html>

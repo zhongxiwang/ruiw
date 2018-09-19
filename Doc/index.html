@@ -1,0 +1,90 @@
+<html>
+
+<head>
+    <title>doc</title>
+    <meta charset="utf-8" />
+    <script src="./layui-v2.4.3/jquery-1.11.3.js"></script>
+    <style>
+    li{
+        list-style:none;
+        text-decoration:none;
+    }
+    .tblist{
+        display: table;
+        height: 30px;
+    }
+
+    .millist {
+        display: table-cell;
+        
+        vertical-align: middle;
+    }
+    </style>
+</head>
+<body>
+    <div>
+        <h2>document</h2>  
+        <div>
+            Menum  Name:<input type="text" id="cm" ><button onclick="createmenuminfo()" >Create</button><br/>
+            Delete Name: <select id="del"></select><button onclick="del()" style="margin: 5px;">Delete</button><br/>
+            Update Name:<input type="text" id="up" ><button onclick="updatemenuminfo()">Update</button><br/>
+            <!--更新使用删除的选择-->
+        </div>
+        <hr/>
+    </div>
+    <div >
+        <ul id="uu">
+        </ul>
+    </div>
+
+    <script>
+        function init()
+        {
+            var ls='<li><div class="tblist"> <div class="millist"><div>23</div></div></div> </li>';
+            var tmp="http://localhost:889/Menum?id=0";
+            $.ajax({
+                url:tmp,
+                type:"GET",
+                success:function(data){
+                    console.log(data);
+                    for(var i=0;i<data.length;i++){
+                        var ls='<li><div class="tblist"> <div class="millist"><div><a bttid="'+data[i].id+'" href="./docs.html?menumid='+data[i].id+'">'+data[i].menumName+'</a></div></div></div> </li>';
+                        var opt='<option value="'+data[i].id+'">'+data[i].menumName+'</option>';
+                        $("#uu").append(ls);
+                        $("#del").append(opt);
+                        console.log(data[i].menumName);
+                    }
+                }
+            });
+        }
+        function createmenuminfo(){
+            var urls="http://localhost:889/Menuminfo?menumname="+$('#cm').val();;
+            $.ajax({
+                url:urls,
+                type:"GET",
+                success:function(data){
+                    alert("ok");
+                }
+            });
+
+        }
+        function del(){
+            
+            $.ajax({url:"http://localhost:889/Menum?id="+$('#del').val(),type:"DELETE",success:function(data){alert("delete ok");}})
+            window.location.href=window.location.href;
+        }
+        function updatemenuminfo(){
+            alert("Update ok");
+            var tmp="http://localhost:889/Menum?"+"MenumName="+$('#up').val()+"&id="+$('#del').val();
+            $.ajax({url:tmp,type:"PUT",success:function(data){alert("Update ok");}});
+           
+            window.location.href=window.location.href;
+        }
+
+
+        (function(){
+            init();
+        }());
+    </script>
+</body>
+</html>

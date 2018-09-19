@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Markdown在线编辑器 - MdEditor</title>
+    <meta name="keywords" content="markdown在线编辑器,online markdown editor,markdown编辑器,在线编辑markdown,mdeditor" />
+    <meta name="description" content="mdeditor是一个在线编辑markdown的工具" />
+    <link rel="stylesheet" href="./editormd/css/editormd.min.css" />
+    <link rel="shortcut icon" href="./editormd/images/logos/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="./layui-v2.4.3/layui/css/layui.css" media="all">
+
+</head>
+
+<body>
+    <input id="title" type="text" style="display:none;" >
+    <div id="layout">
+        <div id="test-editormd" class="editormd editormd-vertical editormd-theme-eclipse editormd-fullscreen" style="width: 100%">
+            <textarea id="mdeditor-textarea" class="editormd-markdown-textarea" placeholder="Enjoy Markdown! coding now..." name="test-editormd-markdown-doc"
+                style="display: none;">
+        </textarea>
+        </div>
+    </div>
+    <script src="./editormd/jquery.min.js"></script>
+    <script src="./editormd/editormd.js"></script>
+    <script src="./editormd/plugins/test-plugin/test-plugin.js"></script>
+    <script src="./editormd/plugins/GetPage/GetPage.js"></script>
+
+    <script src="./layui-v2.4.3/layui/layui.js " charset="utf-8"></script>
+    <script>
+
+        $(function () {
+            $("#test-editormd").removeAttr("class");
+            var md = $("#mdeditor-textarea").text();
+            $("#test-editormd").html("");
+
+
+            //初始化编辑器
+            var testEditor;
+            testEditor = editormd("test-editormd", {
+                width: "100%",
+                height: 740,
+                path: '/Doc/editormd//lib/',
+                theme: "eclipse",//dark
+                previewTheme: "eclipse",//dark
+                editorTheme: "eclipse",//pastel-on-dark
+                markdown: md,
+                codeFold: true,
+                syncScrolling: true,
+                saveHTMLToTextarea: true,    // 保存 HTML 到 Textarea
+                searchReplace: true,
+
+                //watch : false,                // 关闭实时预览
+                htmlDecode: "style,script,iframe|on*",            // 开启 HTML 标签解析，为了安全性，默认不开启    
+                //toolbar  : false,             //关闭工具栏
+                //previewCodeHighlight : false, // 关闭预览 HTML 的代码块高亮，默认开启
+                emoji: true,
+                taskList: true,
+                tocm: true,         // Using [TOCM]
+                tex: true,                   // 开启科学公式TeX语言支持，默认关闭
+                flowChart: true,             // 开启流程图支持，默认关闭
+                sequenceDiagram: true,       // 开启时序/序列图支持，默认关闭,
+                //dialogLockScreen : false,   // 设置弹出层对话框不锁屏，全局通用，默认为true
+                //dialogShowMask : false,     // 设置弹出层对话框显示透明遮罩层，全局通用，默认为true
+                //dialogDraggable : false,    // 设置弹出层对话框不可拖动，全局通用，默认为true
+                //dialogMaskOpacity : 0.4,    // 设置透明遮罩层的透明度，全局通用，默认值为0.1
+                //dialogMaskBgColor : "#000", // 设置透明遮罩层的背景颜色，全局通用，默认为#fff
+                imageUpload: true,
+                imageFormats: ["jpg", "jpeg", "gif", "png", "bmp", "webp"],
+                imageUploadURL: "/Center/RichTextUpload",
+                onload: function () {
+                    //console.log('onload', this);
+                    //this.save();
+                    //this.executePlugin("sdlfjl;", "save/save");
+                    $.ajax({
+
+                        url: "http://localhost:889/document/" + getUrlParam("docid"),
+                        type: "GET",
+                        success: function (data) {
+                            $('#title').val(data.title).hide();
+                            testEditor.setMarkdown(data.content);
+                        }
+                    });
+                    this.fullscreen();
+
+                    //this.unwatch();
+                    //this.watch().fullscreen();
+
+                    //this.setMarkdown("#PHP");
+                    //this.width("100%");
+                    //this.height(480);
+                    //this.resize("100%", 640);
+                },
+                toolbarIcons: function () {
+                    // Or return editormd.toolbarModes[name]; // full, simple, mini
+
+                    var toolbariconarrays = ["undo", "redo", "|", "bold", "del", "italic", "quote", "ucwords", "uppercase", "lowercase", "|", "h1", "h2", "h3", "h4", "h5", "h6", "|", "list-ul", "list-ol", "hr", "|", "link", "reference-link", "image", "code", "preformatted-text", "code-block", "table", "datetime", "emoji", "html-entities", "pagebreak", "|", "goto-line", "watch", "preview", "fullscreen", "clear", "search", "|", "help", "download", "save", "docinfo", "font"];
+                    //toolBarIconArray.push("download");
+                    return toolbariconarrays;
+                },
+                toolbarIconsClass: {
+                    download: "fa-download",//set icon image
+                    //save:""
+
+                },
+                toolbarIconTexts: {
+                    download: "download",
+                    save: "保存",
+
+                    docinfo: 'docinfo',
+                    font: 'fongt'
+                },
+                toolbarHandlers: {
+                    download: function () {
+                        //var htmlBody=$(".editormd-preview-container").eq(0).html();
+                        //console.log(htmlBody);
+                        var blogcontent = encodeURIComponent(testEditor.getMarkdown());
+                        console.log(blogcontent);
+                        this.executePlugin("downloadDialog", "GetPage/GetPage");
+                    },
+                    save: function () {
+
+                        var blogcontent = testEditor.getMarkdown();
+                        var title = $('#title').val();
+                        var url = "http://localhost:889/document/" + getUrlParam("docid");
+                        var data = {
+                            "content": blogcontent,
+                            "title": title
+                        };
+                        $.ajax({
+                            url: url,
+                            type: "PUT",
+                            contentType: "application/json",
+                            data: JSON.stringify(data),
+                            success: function (data) {
+                                layer.msg('Save Ok');
+                            }
+                        });
+                        //this.executePlugin("save", "save/save");
+
+                    },
+                    docinfo: function () {
+
+                        this.executePlugin("downloadDialog", "myself/docinfo");
+                    }
+                }
+
+            });
+
+
+
+        });
+
+        //获取编辑器内容
+        //var blogcontent = encodeURIComponent(testEditor.getMarkdown());
+
+
+
+        function Save() {
+
+        }
+        function getUrlParam(k) {
+            var regExp = new RegExp('([?]|&)' + k + '=([^&]*)(&|$)');
+            var result = window.location.href.match(regExp);
+            if (result) {
+                return decodeURIComponent(result[2]);
+            } else {
+                return null;
+            }
+        }
+
+        var layer;
+        $(function () {
+
+            layui.use(['laydate', 'laypage', 'layer', 'table', 'carousel', 'upload', 'element', 'slider'], function () {
+                var laydate = layui.laydate //日期
+                    , laypage = layui.laypage //分页
+                    , table = layui.table //表格
+                    , carousel = layui.carousel //轮播
+                    , upload = layui.upload //上传
+                    , element = layui.element //元素操作
+                    , slider = layui.slider //滑块
+                layer = layui.layer;//弹窗
+                //向世界问个好
+
+            });
+        });
+
+    </script>
+</body>
+
+</html>
